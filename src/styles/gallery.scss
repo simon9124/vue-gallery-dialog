@@ -16,7 +16,7 @@ i {
 }
 
 .el-pagination {
-  &/deep/ input {
+  &>>>input {
     line-height: 30px;
   }
 }
@@ -32,8 +32,8 @@ i {
   height: auto;
 }
 
-.el-main /deep/ .upload-demo,
-.el-main /deep/ .el-upload {
+.el-main>>>.upload-demo,
+.el-main>>>.el-upload {
   height: 32px;
 }
 
@@ -44,12 +44,12 @@ i {
 .el-aside {
   border-right: 1px solid #d6d6db;
 
-  & /deep/ .el-menu {
+  &>>>.el-menu {
     width: 100%;
     min-height: auto;
     border: 0;
 
-    &/deep/ li {
+    &>>>li {
       padding: 0;
     }
   }
@@ -61,7 +61,7 @@ i {
 
   &-container {
     &-aside {
-      &/deep/ .el-menu {
+      &>>>.el-menu {
         background-color: rgba(0, 0, 0, 0);
         width: 100%;
 
@@ -222,7 +222,7 @@ i {
       .el-input {
         width: 263px;
 
-        /deep/ input {
+        >>>input {
           height: 32px;
         }
       }
@@ -300,7 +300,7 @@ i {
   }
 
   // 行内编辑
-  .el-main /deep/ .el-col /deep/ .el-input /deep/ input {
+  .el-main>>>.el-col>>>.el-input>>>input {
     height: 24px;
     padding-left: 5px;
   }
