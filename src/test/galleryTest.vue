@@ -24,7 +24,7 @@
 import VueDialog from '@/components/VueDialog';
 
 export default {
-  name: 'HelloWorld',
+  name: 'GalleryTest',
   components: { VueDialog },
   data () {
     return {

@@ -237,37 +237,26 @@ export default {
   },
   data () {
     return {
-      // 图片list数据 - 筛选后所有
-      picListAll: [],
-      // 图片list数据 - 当前页面
-      picList: [],
-      // 初始化页码
-      pageNum: 1,
-      // 筛选
-      filterFormData: {
+      picListAll: [], // 图片list数据 - 筛选后所有
+      picList: [], // 图片list数据 - 当前页面
+      pageNum: 1, // 初始化页码
+      filterFormData: { // 筛选
         uploadName: '',
         uploadIsfavorite: ''
       },
-      // 左侧筛选栏
-      filters: [
+      filters: [ // 左侧筛选栏
         { key: 'all', label: '全部', total: 0 },
         { key: 'favorites', label: '我的收藏', total: 0 }
       ],
-      // 动态图片style
-      imgBox: {
+      imgBox: { // 动态图片style
         width: '100%',
         height: ''
       },
-      // 记录屏幕宽度默认值
-      screenWidth: document.body.clientWidth,
-      // 图片list数据 - 被选中的
-      selectList: [],
-      // 单张放大图片，默认隐藏
-      picBigShow: false,
-      // 单张图片url（放大）
-      picUrl: '',
-      // 图片在当前页面的索引值
-      index: 0
+      screenWidth: document.body.clientWidth, // 记录屏幕宽度默认值
+      selectList: [], // 图片list数据 - 被选中的
+      picBigShow: false, // 单张放大图片，默认隐藏
+      picUrl: '', // 单张图片url（放大）
+      index: 0 // 图片在当前页面的索引值
     };
   },
   watch: {
@@ -318,28 +307,28 @@ export default {
     // dialog初始化
     init () {
       // 根据业务类型查询结果列表
-      if (this.type === 'PhotoGallery') {
-        // 为每张图片添加select和edit属性
-        this.picListOrg.map(pic => {
-          this.$set(pic, 'edit', false);
-          this.$set(pic, 'select', false);
-          return pic;
+      // if (this.type === 'PhotoGallery') {
+      // 为每张图片添加select和edit属性
+      this.picListOrg.map(pic => {
+        this.$set(pic, 'edit', false);
+        this.$set(pic, 'select', false);
+        return pic;
+      });
+      // 数据筛选
+      this.refreshGallery();
+      // 数据加载完后，若有筛选到的数据 -> 获取imgBox的宽度，并设置其高度
+      if (this.picList.length > 0) {
+        this.$nextTick(() => {
+          const imgBox = this.$refs.imgBox;
+          // console.log(imgBox)
+          if (this.visible) {
+            const wImgbox = imgBox[0].getBoundingClientRect().width;
+            // console.log(wImgbox)
+            this.imgBox.height = 0.6 * wImgbox + 'px';
+          }
         });
-        // 数据筛选
-        this.refreshGallery();
-        // 数据加载完后，若有筛选到的数据 -> 获取imgBox的宽度，并设置其高度
-        if (this.picList.length > 0) {
-          this.$nextTick(() => {
-            const imgBox = this.$refs.imgBox;
-            // console.log(imgBox)
-            if (this.visible) {
-              const wImgbox = imgBox[0].getBoundingClientRect().width;
-              // console.log(wImgbox)
-              this.imgBox.height = 0.6 * wImgbox + 'px';
-            }
-          });
-        }
       }
+      // }
     },
     // 左侧filters栏数据
     getFiltersData () {

@@ -1,4 +1,4 @@
-<!--公用组件：Dialog弹出窗口组件
+<!--组件：Dialog弹出窗口
 /**
   * 弹窗参数：
   * @title    弹出窗口表头  require:false   default:'上传组件'
@@ -17,49 +17,42 @@
 **/
 -->
 <template>
-  <div>
-    <!-- <el-button type="text"
-               @click="openDialog">点击打开图片库</el-button> -->
+  <el-dialog class="dialog"
+             :title="title"
+             :width="width"
+             :top="top"
+             :visible.sync="visible"
+             :before-close="closeHandler"
+             @open="openHandler"
+             custom-class="dialog"
+             element-loading-text="数据加载中"
+             element-loading-spinner="el-icon-loading"
+             element-loading-background="rgba(0, 0, 0, 0.8)"
+             v-loading="loading">
 
-    <el-dialog class="dialog"
-               :title="title"
-               :width="width"
-               :top="top"
-               :visible.sync="visible"
-               :before-close="closeHandler"
-               @open="openHandler"
-               custom-class="dialog"
-               element-loading-text="数据加载中"
-               element-loading-spinner="el-icon-loading"
-               element-loading-background="rgba(0, 0, 0, 0.8)"
-               v-loading="loading">
+    <!-- 图片库 -->
+    <Gallery :visible="visible"
+             :page-size="pageSize"
+             :pic-list-org="picList"
+             :gallery-list="galleryList"
+             @picDelHandler="picDelHandler"
+             @picsDelHandler="picsDelHandler"
+             @insertFavor="insertFavor"
+             @deleteFavor="deleteFavor"
+             @picReName="picReName"
+             @picsUpload="picsUpload"
+             @picClickHander="picClickHander">
+    </Gallery>
 
-      <!-- 图片库 -->
-      <!-- <div v-if="type='PhotoGallery'"> -->
-      <!-- :type="type" -->
-      <Gallery :visible="visible"
-               :page-size="pageSize"
-               :pic-list-org="picList"
-               :gallery-list="galleryList"
-               @picDelHandler="picDelHandler"
-               @picsDelHandler="picsDelHandler"
-               @insertFavor="insertFavor"
-               @deleteFavor="deleteFavor"
-               @picReName="picReName"
-               @picsUpload="picsUpload"
-               @picClickHander="picClickHander"></Gallery>
-      <!-- </div> -->
+    <!-- footer -->
+    <span slot="footer"
+          class="dialog-footer">
+      <el-button @click="closeHandler">取 消</el-button>
+      <el-button type="primary"
+                 @click="confirmHandler">确 定</el-button>
+    </span>
 
-      <!-- footer -->
-      <span slot="footer"
-            class="dialog-footer">
-        <!-- v-if="type !== 'ScriptCreate'" -->
-        <el-button @click="closeHandler">取 消</el-button>
-        <el-button type="primary"
-                   @click="confirmHandler">确 定</el-button>
-      </span>
-    </el-dialog>
-  </div>
+  </el-dialog>
 </template>
 
 <script>
@@ -67,13 +60,8 @@ import Gallery from './Gallery/Gallery';
 
 export default {
   name: 'VueDialog',
-  components: {
-    Gallery
-  },
+  components: { Gallery },
   props: {
-    /*
-      公共
-    */
     //  Dialog CSS 中的 margin-top 值
     top: {
       type: String,
@@ -94,21 +82,11 @@ export default {
       type: Boolean,
       default: false
     },
-    // 类型
-    // type: {
-    //   type: String,
-    //   // required: true,
-    //   default: 'UploadExcel'
-    // },
     // loading
     loading: {
       type: Boolean,
       default: false
     },
-
-    /*
-      图片库
-    */
     // 数据列表
     picList: {
       type: Array,
@@ -132,8 +110,7 @@ export default {
   },
   data () {
     return {
-      // 图片list数据 - 被选中的
-      galleryList: []
+      galleryList: [] // 图片list数据 - 被选中的
     };
   },
   methods: {
@@ -200,7 +177,7 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-.dialog /deep/ {
+.dialog >>> {
   .el-dialog {
     .el-dialog__body {
       padding: 10px 0 0 0;
