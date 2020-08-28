@@ -22,6 +22,7 @@
 
 <script>
 import VueDialog from '@/components/VueDialog';
+import { galleryData } from "@/mock/gallery"
 
 export default {
   name: 'GalleryTest',
@@ -35,7 +36,7 @@ export default {
     };
   },
   created () {
-    // this.galleryData.list = []
+    this.galleryData = galleryData
   },
   methods: {
     // 打开dialog弹框
