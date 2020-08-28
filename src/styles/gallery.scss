@@ -49,7 +49,7 @@ i {
     min-height: auto;
     border: 0;
 
-    &>>>li {
+    li {
       padding: 0;
     }
   }
@@ -177,6 +177,11 @@ i {
           line-height: 24px;
           // vertical-align: text-bottom;
           vertical-align: baseline;
+
+          >>>input {
+            height: 24px;
+            padding-left: 5px;
+          }
         }
 
         .el-button {
@@ -276,8 +281,7 @@ i {
         left: 0px;
         right: 0px;
         margin: auto;
-        max-height: 80%; // transform: scale(1);
-        // transition: all ease 0.2s;
+        max-height: 80%;
       }
 
       &-text {
@@ -299,12 +303,7 @@ i {
     }
   }
 
-  // 行内编辑
-  .el-main>>>.el-col>>>.el-input>>>input {
-    height: 24px;
-    padding-left: 5px;
-  }
-
+  // 放大按钮
   .gallery-list-col-img:hover .gallery-list-col-glass {
     display: block;
   }
@@ -313,7 +312,7 @@ i {
 // 图片放大
 .pic-magnify {
   display: inline-block;
-  position: relative; // z-index: 1003;
+  position: relative;
 
   &-glass {
     display: none;
