@@ -186,7 +186,7 @@
           <!-- 图片放大 -->
           <div class="gallery-list-bigMask"
                v-if="picBigShow"
-               @click.prevent.stop="picBigShow=!picBigShow"
+               @click.prevent.stop="picBigUnShow"
                @mousewheel="picBigZoom">
             <el-button class="gallery-list-bigMask-button gallery-list-bigMask-button-left"
                        type="info"
@@ -198,9 +198,10 @@
                        @click.stop="picBigRight"></el-button>
             <img class="gallery-list-bigMask-img"
                  :src="picUrl"
+                 ref="bigImage"
                  @click.prevent.stop="picBigSelect">
-            <!-- <a class="gallery-list-bigMask-text"
-               @click="showOrgPic()">查看原图</a> -->
+            <a class="gallery-list-bigMask-text"
+               @click="showOrgPic">查看原图</a>
           </div>
 
         </el-main>
@@ -252,7 +253,8 @@ export default {
         width: '100%',
         height: ''
       },
-      screenWidth: document.body.clientWidth, // 记录屏幕宽度默认值
+      screenWidth: document.documentElement.clientWidth, // 记录屏幕宽度默认值
+      screenHeight: document.documentElement.clientHeight, // 记录屏幕高度默认值
       selectList: [], // 图片list数据 - 被选中的
       picBigShow: false, // 单张放大图片，默认隐藏
       picUrl: '', // 单张图片url（放大）
@@ -291,7 +293,7 @@ export default {
     const that = this;
     window.onresize = () => {
       return (() => {
-        window.screenWidth = document.body.clientWidth;
+        window.screenWidth = document.documentElement.clientWidth;
         that.screenWidth = window.screenWidth;
         this.$nextTick(() => {
           const imgBox = this.$refs.imgBox;
@@ -463,11 +465,14 @@ export default {
         this.index++;
       }
     },
+    // 点击其他区域隐藏大图，"查看原图"按钮除外
+    picBigUnShow (e) {
+      // console.log(e.target.className);
+      e.target.className !== "gallery-list-bigMask-text" && (this.picBigShow = false)
+    },
     // 查看原图
     showOrgPic () {
-      const url = 'https://' + this.picUrl;
-      console.log(url);
-      window.open(url, '_blank');
+      window.open(this.picUrl, '_blank');
     },
     // 点击放大后的图片
     picBigSelect () {
@@ -475,7 +480,17 @@ export default {
     },
     // 放大后滚动鼠标滚轴
     picBigZoom () {
-      // console.log('1')
+      // 获取当前页面的缩放比，若未设置zoom缩放比，则为默认100%，即1，原图大小
+      var zoom = parseInt(this.$refs.bigImage.style.zoom) || 100;
+      // event.wheelDelta：获取滚轮滚动值并将滚动值叠加给缩放比zoom
+      // wheelDelta统一为±120，其中正数表示为向上滚动，负数表示向下滚动
+      zoom += event.wheelDelta / 18;
+      /* 最小范围 和 最大范围 的图片缩放尺度 */
+      var bigImageHeight = this.$refs.bigImage.getBoundingClientRect().height * zoom / 100
+      if (bigImageHeight >= this.screenHeight * 0.4 && bigImageHeight < this.screenHeight * 0.8) {
+        this.$refs.bigImage.style.zoom = zoom + "%";
+      }
+      return false;
     }
   }
 };
