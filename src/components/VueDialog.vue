@@ -1,20 +1,14 @@
 <!--组件：Dialog弹出窗口
-/**
-  * 弹窗参数：
+  * Attributes：
+  * @top    Dialog CSS 中的 margin-top 值  require:false   default:'15vh'
   * @title    弹出窗口表头  require:false   default:'上传组件'
-  * @visible  是否显示弹窗  require:false   default:false 不显示
   * @width    弹窗宽度     require:false   default:'50%'
-  * @type     弹窗类别     require:false    default:'UploadExcel'  UploadExcel/PhotoGallery:Excel上传/图片库
-  * 上传组件参数:
-  * @uploadResult Excel上传结果 require:false default:''
+  * @visible  是否显示弹窗  require:false   default:false 不显示
   *
-  * Event-Dialog:
-  * @openHandler    弹窗弹出回调
-  * @closeHandler   关闭按钮回调
-  * @confirmHandler 确认按钮回调  return {visable: this.isVisable, galleryList:this.galleryList}
-  * Event-Upload:
-  * @httpRequestHandler 上传请求 param:{param:{file}, upload组织对象}
-**/
+  * Events:
+  * @open    弹窗弹出回调
+  * @close   关闭按钮回调
+  * @confirm 确认按钮回调  return {visable: this.isVisable, galleryList:this.galleryList}
 -->
 <template>
   <el-dialog class="dialog"
@@ -22,41 +16,43 @@
              :width="width"
              :top="top"
              :visible.sync="visible"
-             :before-close="closeHandler"
-             @open="openHandler"
-             custom-class="dialog"
-             element-loading-text="数据加载中"
-             element-loading-spinner="el-icon-loading"
-             element-loading-background="rgba(0, 0, 0, 0.8)"
-             v-loading="loading">
+             :before-close="close"
+             @open="open">
 
     <!-- 图片库 -->
     <Gallery :visible="visible"
-             :page-size="pageSize"
              :pic-list-org="picList"
              :gallery-list="galleryList"
-             @picDelHandler="picDelHandler"
-             @picsDelHandler="picsDelHandler"
-             @insertFavor="insertFavor"
-             @deleteFavor="deleteFavor"
-             @picReName="picReName"
-             @picsUpload="picsUpload"
-             @picClickHander="picClickHander">
+             :page-num="pageNum"
+             :page-size="pageSize"
+             :total="total"
+             :filters="filters"
+             :loading="loading"
+             @page-change="pageChange"
+             @aside-select="asideSelect"
+             @pics-upload="picsUpload"
+             @pics-delete="picsDelete"
+             @pic-delete="picDelete"
+             @pic-click="picClick"
+             @insert-favor="insertFavor"
+             @delete-favor="deleteFavor"
+             @clipboard-copy="clipboardCopy"
+             @re-name="reName">
     </Gallery>
 
     <!-- footer -->
     <span slot="footer"
           class="dialog-footer">
-      <el-button @click="closeHandler">取 消</el-button>
+      <el-button @click="close">取 消</el-button>
       <el-button type="primary"
-                 @click="confirmHandler">确 定</el-button>
+                 @click="confirm">确 定</el-button>
     </span>
 
   </el-dialog>
 </template>
 
 <script>
-import Gallery from './Gallery/Gallery';
+import Gallery from './Gallery/Gallery'; // 组件：图片库
 
 export default {
   name: 'VueDialog',
@@ -77,7 +73,7 @@ export default {
       type: String,
       default: '60%'
     },
-    // 弹窗是否可见
+    // 弹窗是否可见 - 父组件数据
     visible: {
       type: Boolean,
       default: false
@@ -87,90 +83,91 @@ export default {
       type: Boolean,
       default: false
     },
-    // 数据列表
+    // 数据列表 - 当前页
     picList: {
       type: Array,
       default: () => []
+    },
+    // 初始化页码
+    pageNum: {
+      type: Number,
+      default: 1
     },
     // 初始化每页显示数量
     pageSize: {
       type: Number,
       default: 8
     },
-    // Excel 上传结果
-    uploadResult: {
-      type: String,
-      default: ''
-    }
-  },
-  watch: {
-    visible (value) {
-      // console.debug('watch %s', value)
+    // 总数
+    total: {
+      type: Number,
+      default: 0
+    },
+    // 左侧筛选栏
+    filters: {
+      type: Array,
+      default: () => []
     }
   },
   data () {
     return {
-      galleryList: [] // 图片list数据 - 被选中的
+      galleryList: [], // 图片list数据 - 被选中的
     };
   },
   methods: {
-    /*
-      公共
-    */
-    // 打开dialog弹框
-    openDialog () {
-      this.visible = true;
+    // 回调：打开弹窗
+    open () {
+      this.$emit('open', this.isVisable);
     },
-    // 弹窗dialog回调
-    openHandler () {
-      this.$emit('openHandler', this.isVisable);
+    // 回调：关闭弹窗
+    close (done) {
+      this.$emit('close', this.isVisable);
+      this.galleryList = [];
     },
-    // 关闭按钮回调
-    closeHandler () {
-      this.$emit('closeHandler', this.isVisable);
+    // 回调：页码跳转
+    pageChange (pageNum) {
+      this.$emit('page-change', pageNum)
     },
-    // 确认按钮回调
-    confirmHandler () {
-      this.$emit('confirmHandler', {
-        visable: this.isVisable,
-        galleryList: this.galleryList
-      });
+    // 回调：左侧边栏被选中
+    asideSelect (key) {
+      this.$emit('aside-select', key)
     },
-    // 上传请求回调
-    httpRequestHandler (param) {
-      this.$emit('httpRequestHandler', param);
-    },
-
-    /*
-      图片库
-    */
     // 改变图片选中状态
-    picClickHander (selectList) {
+    picClick (selectList) {
       this.galleryList = selectList;
     },
-    // 批量删除图片
-    picsDelHandler (selectList) {
-      this.$emit('picsDelHandler', selectList);
+    // 回调：批量删除图片
+    picsDelete (selectList) {
+      this.$emit('pics-delete', selectList);
     },
-    // 删除单张图片
-    picDelHandler (pic) {
-      this.$emit('picDelHandler', pic);
+    // 回调：删除单张图片
+    picDelete (pic) {
+      this.$emit('pic-delete', pic);
     },
-    // 重命名图片
-    picReName (pic) {
-      this.$emit('picReName', pic);
+    // 回调：重命名图片
+    reName (pic) {
+      this.$emit('re-name', pic);
     },
-    // 用户收藏
+    // 回调：用户收藏
     insertFavor (pic) {
-      this.$emit('insertFavor', pic);
+      this.$emit('insert-favor', pic);
     },
-    // 用户取消收藏
+    // 回调：用户取消收藏
     deleteFavor (pic) {
-      this.$emit('deleteFavor', pic);
+      this.$emit('delete-favor', pic);
     },
-    // 批量上传图片
+    // 回调：批量上传图片
     picsUpload (files) {
-      this.$emit('picsUpload', files);
+      this.$emit('pics-upload', files);
+    },
+    // 回调：复制图片链接
+    clipboardCopy () {
+      this.$emit("clipboard-copy")
+    },
+    // 回调：确认按钮
+    confirm () {
+      this.$emit('confirm', this.galleryList);
+      this.galleryList = [];
     }
   }
 };
@@ -183,5 +180,10 @@ export default {
       padding: 10px 0 0 0;
     }
   }
+}
+.el-button {
+  height: 32px;
+  line-height: 6px;
+  font-size: 12px;
 }
 </style>
