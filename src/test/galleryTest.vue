@@ -2,10 +2,7 @@
   <div>
     <el-button type="text"
                @click="openDialog">点击打开图片库</el-button>
-    <vue-dialog width="80%"
-                top="5vh"
-                title="图片库"
-                :visible="visible"
+    <vue-dialog :visible="visible"
                 :loading="loading"
                 :pic-list="picList"
                 :filters="filters"
