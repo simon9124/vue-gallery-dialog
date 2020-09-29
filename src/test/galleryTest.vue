@@ -6,15 +6,17 @@
                 top="5vh"
                 title="图片库"
                 :visible="visible"
+                :loading="loading"
                 :pic-list="picList"
                 :filters="filters"
-                :loading="loading"
+                :filter-form-data="filterFormData"
                 :page-num="pageNum"
                 :page-size="pageSize"
                 :total="total"
                 @close="visible=false"
                 @confirm="confirm"
                 @page-change="pageChange"
+                @search-filter="searchFilter"
                 @aside-select="asideSelect"
                 @pics-upload="picsUpload"
                 @pics-delete="picsDelete"
@@ -36,13 +38,13 @@ export default {
   data () {
     return {
       visible: false, // dialog显示与否
+      loading: false, // loading
       galleryData: {}, //  图片list数据 - 原始数据
       picListAll: [], // 图片list数据 - 筛选后所有
       picList: [], // 图片list数据 - 当前页面
       pageSize: 8, // 初始化每页显示数量
       pageNum: 1, // 初始化页码
       total: 0, // 总数
-      loading: false, // loading
       filters: [ // 左侧筛选栏
         { key: 'all', label: '全部', total: 0 },
         { key: 'uploadIsfavorite', label: '我的收藏', total: 0 }
@@ -63,12 +65,6 @@ export default {
         };
       }
     },
-    filters: {
-      deep: true,
-      handler: function (val) {
-        this.filters = val;
-      }
-    }
   },
   methods: {
     // 按钮：点击打开图片库
@@ -85,40 +81,40 @@ export default {
         this.$set(pic, 'select', false);
         return pic;
       });
-      this.getFiltersData(); // 左侧filters栏数据
       this.refreshData(); // 数据筛选
-    },
-    // dialog - 左侧filters数据
-    getFiltersData () {
-      // 计算总favourate数据
-      var favoriteCount = 0;
-      this.galleryData.list.forEach(pic => {
-        pic.uploadIsfavorite && (favoriteCount += 1)
-      });
-      // 渲染左侧filters栏的数据
-      this.filters.forEach(filter => {
-        if (filter.key === 'all') {
-          filter.total = this.galleryData.list.length;
-        } else if (filter.key === 'uploadIsfavorite') {
-          filter.total = favoriteCount;
-        }
-      });
     },
     // dialog - 数据筛选
     refreshData () {
       this.picListAll = this.galleryData.list.filter(pic => { // 根据关键词 or 边栏选择，筛选数据
-        if (
+        return (
           pic.uploadName.indexOf(this.filterFormData.uploadName) > -1 &&
           pic.uploadIsfavorite
             .toString()
             .indexOf(this.filterFormData.uploadIsfavorite.toString()) > -1
-        ) {
-          return pic;
-        }
+        );
       });
+      this.getFiltersData(); // 左侧filters数据
       this.pageChange(this.pageNum); // 数据分页 -> 当前页
       this.total = this.picListAll.length; // 数据总数
       this.loading = false;
+    },
+    // dialog - 左侧filters数据
+    getFiltersData () {
+      // 渲染左侧filters栏的数据
+      this.filters.forEach(filter => {
+        if (filter.key === 'all') {
+          filter.total =
+            this.galleryData.list.filter(pic => {
+              return pic.uploadName.indexOf(this.filterFormData.uploadName) > -1
+            }).length;
+          this.galleryData.list.length;
+        } else if (filter.key === 'uploadIsfavorite') {
+          filter.total = 0;
+          this.picListAll.forEach(pic => {
+            pic.uploadIsfavorite && (filter.total += 1)
+          });
+        }
+      });
     },
     // dialog - 页码跳转
     pageChange (pageNum) {
@@ -127,6 +123,13 @@ export default {
         (this.pageNum - 1) * this.pageSize,
         this.pageNum * this.pageSize
       );
+    },
+    // dialog - 顶部搜索或按回车键
+    searchFilter (filterFormData) {
+      this.loading = true;
+      this.filterFormData = filterFormData;
+      this.pageNum = 1;
+      this.refreshData();
     },
     // dialog - 左侧边栏被选中
     asideSelect (key) {
@@ -144,6 +147,13 @@ export default {
     },
     // dialog - 批量删除图片
     async picsDelete (selectList) {
+      if (selectList.length === 0) {
+        this.$message({
+          message: "未选择图片",
+          type: "error"
+        });
+        return false;
+      }
       const res = await this.$confirm('确认删除？', '提示', {
         type: 'warning'
       }).catch(() => { });
@@ -154,6 +164,7 @@ export default {
           const index = this.galleryData.list.indexOf(pic);
           this.galleryData.list.splice(index, 1);
         });
+        this.getFiltersData();
         this.refreshData();
         this.getResultMessage('删除成功');
       }
@@ -167,6 +178,7 @@ export default {
         // 前端虚拟删除操作 -> 根据pic的下标删除该pic
         const index = this.galleryData.list.indexOf(pic);
         this.galleryData.list.splice(index, 1);
+        this.getFiltersData();
         this.refreshData();
         this.getResultMessage("删除成功");
       }
