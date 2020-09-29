@@ -20,15 +20,21 @@
              @open="open">
 
     <!-- 图片库 -->
-    <Gallery :visible="visible"
-             :pic-list-org="picList"
+    <gallery :visible="visible"
+             :pic-list-props="picList"
              :gallery-list="galleryList"
              :page-num="pageNum"
              :page-size="pageSize"
              :total="total"
              :filters="filters"
+             :filter-form-data="filterFormData"
              :loading="loading"
+             :big-pic="bigPic"
+             :favorite="favorite"
+             :edit="edit"
+             :copy-link="copyLink"
              @page-change="pageChange"
+             @search-filter="searchFilter"
              @aside-select="asideSelect"
              @pics-upload="picsUpload"
              @pics-delete="picsDelete"
@@ -38,7 +44,7 @@
              @delete-favor="deleteFavor"
              @clipboard-copy="clipboardCopy"
              @re-name="reName">
-    </Gallery>
+    </gallery>
 
     <!-- footer -->
     <span slot="footer"
@@ -107,7 +113,32 @@ export default {
     filters: {
       type: Array,
       default: () => []
-    }
+    },
+    // 筛选表单
+    filterFormData: {
+      type: Object,
+      default: () => { }
+    },
+    // 是否显示功能 - 图片放大
+    bigPic: {
+      type: Boolean,
+      default: true
+    },
+    // 是否显示功能 - 收藏
+    favorite: {
+      type: Boolean,
+      default: true
+    },
+    // 是否显示功能 - 重命名
+    edit: {
+      type: Boolean,
+      default: true
+    },
+    // 是否显示功能 - 复制链接
+    copyLink: {
+      type: Boolean,
+      default: true
+    },
   },
   data () {
     return {
@@ -127,6 +158,10 @@ export default {
     // 回调：页码跳转
     pageChange (pageNum) {
       this.$emit('page-change', pageNum)
+    },
+    // 回调：顶部搜索或按回车键
+    searchFilter (filterFormData) {
+      this.$emit('search-filter', filterFormData)
     },
     // 回调：左侧边栏被选中
     asideSelect (key) {
