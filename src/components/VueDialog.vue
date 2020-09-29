@@ -67,17 +67,17 @@ export default {
     //  Dialog CSS 中的 margin-top 值
     top: {
       type: String,
-      default: '15vh'
+      default: '5vh'
     },
     // 标题
     title: {
       type: String,
-      default: '提示'
+      default: '图片库'
     },
     // 弹窗宽度
     width: {
       type: String,
-      default: '60%'
+      default: '80%'
     },
     // 弹窗是否可见 - 父组件数据
     visible: {
