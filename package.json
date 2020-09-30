@@ -1,7 +1,7 @@
 {
   "name": "vue-gallery-dialog",
-  "version": "1.0.0",
-  "description": "A Vue.js project",
+  "version": "1.0.2",
+  "description": "Vue弹窗图片库组件",
   "author": "simon9124 <435776313@qq.com>",
   "private": false,
   "scripts": {
